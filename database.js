@@ -33,14 +33,17 @@ await pool.query(`
     SET Status = 'Done'
     WHERE ID = ?;
     `,[taskID])
-}
 
+await log(taskID,'Done')
+}
+//['To Do', 'In Progress', 'Done']
 async function convertTaskToInProgress(taskID){
 await pool.query(`
     UPDATE Tasks
     SET Status = 'In Progress'
     WHERE ID = ?;
     `,[taskID])
+    await log(taskID,'In Progress')
 }
 
 async function convertTaskToToDo(taskID){
@@ -49,6 +52,17 @@ await pool.query(`
     SET Status = 'To Do'
     WHERE ID = ?;
     `,[taskID])
+    await log(taskID,'To Do')
+}
+
+async function updateTask(taskID,status){
+    if(status == 'To Do'){
+        await convertTaskToToDo(taskID)
+    }else if(status ==  'In Progress'){
+        await convertTaskToInProgress(taskID)
+    }else{
+        await convertTaskToDone(taskID)
+    }
 }
 
 // async function userOwnsTask(taskID,userID){
@@ -150,4 +164,4 @@ if(rows.length === 0){
     return rows
 }
 }
-module.exports = {getTasks,getTask,convertTaskToDone,convertTaskToInProgress,convertTaskToToDo,userOwnsTask,log,createUser,createTask,getUserByID,getUserByName}
+module.exports = {getTasks,getTask,userOwnsTask,log,createUser,createTask,getUserByID,getUserByName,updateTask}
