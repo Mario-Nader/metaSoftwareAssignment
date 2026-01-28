@@ -80,4 +80,29 @@ function logout(req,res){
     }
 }
 
-module.exports = {signup,login,authenMid,logout}
+async function verifyUser(req,res,next){
+    token = req.cookies.token;
+    let id = 0;
+    if(!token){
+        res.status(401).json({"msg":"unauthorized access"});
+    }else{
+        jwt.verify(token,process.env.secretTokenString,(err,decodedToken)=>{
+            if(err){
+                console.log(err.message);
+                res.status(401).json({"msg":"unauthorized access"});
+            }else{
+                 id = decodedToken.id;
+            }
+        })
+    }
+    const user = await DBcontrollers.getUserByID(id);
+    if(!user){
+        res.status(404).json({"msg":"user not found"})
+    }else{
+        req.id = id;
+        next();
+    }
+}
+
+
+module.exports = {signup,login,authenMid,verifyUser,logout}
