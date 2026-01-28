@@ -24,12 +24,12 @@ CREATE TABLE Tasks (
 create TABLE logs(
     ID INT PRIMARY KEY AUTO_INCREMENT,
     TaskID int,
-    userID int,
-    oldStatus ENUM('To Do', 'In Progress', 'Done'),
-    newStatus ENUM('To Do', 'In Progress', 'Done'),
+    UserID int,
+    oldState ENUM('To Do', 'In Progress', 'Done'),
+    newState ENUM('To Do', 'In Progress', 'Done'),
     ChangedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     constraint fk_logs_task
         FOREIGN KEY (TaskID) REFERENCES Tasks(ID),
     constraint fk_logs_user
-        FOREIGN KEY (userID) REFERENCES Users(ID)
+        FOREIGN KEY (UserID) REFERENCES Users(ID)
 );
