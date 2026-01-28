@@ -1,8 +1,5 @@
 const mysql = require("mysql2")
-const { use } = require("react")
 const bcrypt = require('bcrypt');
-const { describe } = require("node:test");
-
 const pool = mysql.createPool({
     host:process.env.host,
     user:process.env.user,
@@ -14,7 +11,7 @@ const pool = mysql.createPool({
 async function getTasks(userID){
     const [rows] = await pool.query(`
         select *
-        from tasks
+        from Tasks
         where UserID = ?
         `,[userID])
     return rows
@@ -23,7 +20,7 @@ async function getTasks(userID){
 async function getTask(taskID){
 const [rows] = await pool.query(`
     select *
-    from tasks
+    from Tasks
     where ID = ?
     `,
 [taskID])
@@ -106,15 +103,51 @@ return true;
 }
 
 async function createUser(name,password){
-await pool.query(`
+    const hashedPassword = await bcrypt.hash(password,process.env.salt)
+    try{ 
+const [user] = await pool.query(`
     insert into Users (Username, PasswordHash)
     values(?,?)
-    `[name,bcrypt.hash(password,process.env.salt)])
+    `,[name,hashedPassword])
+return user.insertId
+}catch(err){
+    console.log(err.message)
+    return null;
+}
 }
 
 async function createTask(title,description,dueDate,UserID){
     await pool.query(`
     insert into Tasks (Title,Description,DueDate,UserID)
     values(?,?,?,?)
-    `[title,description,dueDate,UserID])
+    `,[title,description,dueDate,UserID])
 }
+
+async function getUserByID(userID){
+const [row] = await pool.query(`
+    select *
+    from Users
+    where ID = ?
+    `,
+[userID])
+if(row.length === 0){
+    return null
+}else{
+return row[0]
+}
+}
+
+async function getUserByName(name){
+    const [rows] = await pool.query(`
+    select *
+    from Users
+    where Username = ?
+    `,
+[name])
+if(rows.length === 0){
+    return null
+}else{
+    return rows
+}
+}
+module.exports = {getTasks,getTask,convertTaskToDone,convertTaskToInProgress,convertTaskToToDo,userOwnsTask,log,createUser,createTask,getUserByID,getUserByName}
