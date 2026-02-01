@@ -1,1 +1,0 @@
-const DBcontrollers = require('./database')
