@@ -158,7 +158,7 @@ return row[0]
 
 
 
-async function updateWholeTask(id,title,description,dueDate,){
+async function updateWholeTask(id,title,description,dueDate){
 await pool.query(`
     update Tasks
     set Title = ?,
