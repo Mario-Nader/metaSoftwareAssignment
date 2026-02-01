@@ -24,7 +24,11 @@ const [rows] = await pool.query(`
     where ID = ?
     `,
 [taskID])
-return rows[0]
+if(rows[0].length != 0){
+return rows[0];
+}else{
+    return null;
+}
 }
 
 async function convertTaskToDone(taskID){
@@ -55,7 +59,7 @@ await pool.query(`
     await log(taskID,'To Do')
 }
 
-async function updateTask(taskID,status){
+async function updateStatus(taskID,status){
     if(status == 'To Do'){
         await convertTaskToToDo(taskID)
     }else if(status ==  'In Progress'){
@@ -151,6 +155,19 @@ return row[0]
 }
 }
 
+
+
+async function updateWholeTask(id,title,description,dueDate,){
+await pool.query(`
+    update Tasks
+    set Title = ?,
+        Description = ?,
+        DueDate = ?
+    where ID = ?;
+    `,[title,description,dueDate,id])
+}
+
+
 async function getUserByName(name){
     const [rows] = await pool.query(`
     select *
@@ -164,4 +181,27 @@ if(rows.length === 0){
     return rows
 }
 }
-module.exports = {getTasks,getTask,userOwnsTask,log,createUser,createTask,getUserByID,getUserByName,updateTask}
+
+async function deleteTaskByID(id){//returns true if it finds and delete the task successfuly and false if the task doesn't exist
+const [row] = await pool.query(
+    `
+    SELECT 1
+    FROM Tasks
+    WHERE ID = ?
+    LIMIT 1
+    `,
+    [id]
+  );
+
+  if (row.length > 0){
+    await pool.query(`
+        delete 
+        from Tasks
+        where ID = ?
+        `,[id])
+        return true;
+    }else{
+        return false;
+    }
+}
+module.exports = {getTasks,getTask,userOwnsTask,log,createUser,createTask,getUserByID,getUserByName,updateStatus,deleteTaskByID,updateWholeTask}
